@@ -17,41 +17,47 @@ public class AddonView extends VerticalLayout {
     public AddonView() {
 
         Select<Locale> localeSelect = new Select<>("Select locale", event -> {
-            UI.getCurrent().setLocale(event.getValue());
+            if (event.getValue() != null) {
+                UI.getCurrent().setLocale(event.getValue());
+            }
         });
         localeSelect.setItems(
                 Locale.ENGLISH,
                 Locale.GERMAN,
                 Locale.FRENCH,
-                Locale.forLanguageTag("FI"));
+                Locale.forLanguageTag("fi"));
+        localeSelect.setValue(Locale.ENGLISH);
         add(localeSelect);
 
-        // Examples using the new Feedback utility class
-        add(new Button("Feedback.simple()", event -> {
-        Feedback.simple(feedback -> {
-            add(new Text("Simple Feedback via Feedback.simple(): " + feedback.getMessage()));
-            Notification.show("Thank you for your simple feedback!",
+        // Simple dialog: asks only for a message.
+        add(new Button("Feedback.simple()", event ->
+                Feedback.simple(feedback -> {
+                    add(new Text("Simple feedback: " + feedback.getMessage()));
+                    Notification.show("Thank you for your simple feedback!",
+                                    3000, Notification.Position.MIDDLE)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                })));
+
+        // Full dialog: type, message, name and email.
+        add(new Button("Feedback.normal()", event ->
+                Feedback.normal(feedback -> {
+                    add(new Text("Full feedback: " + feedback));
+                    Notification.show("Thank you for your detailed feedback!",
+                                    3000, Notification.Position.MIDDLE)
+                            .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                })));
+
+        // Register the error handler once so an unhandled exception opens a
+        // pre-filled feedback dialog. Clicking the button below triggers one.
+        Feedback.registerErrorHandler(UI.getCurrent(), feedback -> {
+            add(new Text("Error feedback: " + feedback.getMessage()));
+            Notification.show("Thank you for reporting the problem!",
                             3000, Notification.Position.MIDDLE)
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         });
-        }));
 
-        add(new Button("Feedback.full()", event -> {
-            Feedback.normal(feedback -> {
-                add(new Text("Full Feedback via Feedback.full(): " + feedback));
-                Notification.show("Thank you for your detailed feedback!",
-                                3000, Notification.Position.MIDDLE)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            });
-        }));
-
-        add(new Button("Feedback.show() [alias for simple]", event -> {
-            Feedback.registerErrorHandler(getUI().orElse(UI.getCurrent()), feedback -> {
-                add(new Text("Feedback via Feedback.show(): " + feedback.getMessage()));
-                Notification.show("Thank you for your feedback via show()!",
-                                3000, Notification.Position.MIDDLE)
-                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            });
+        add(new Button("Trigger an error", event -> {
+            throw new IllegalStateException("Demo error for the feedback dialog");
         }));
     }
 }

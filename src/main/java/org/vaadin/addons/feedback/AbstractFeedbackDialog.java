@@ -12,8 +12,17 @@ public abstract class AbstractFeedbackDialog extends Dialog {
         }
     }
 
-    public void open(FeedbackHandler handler) {
+    /**
+     * Sets the handler invoked when the user submits feedback. Can be used
+     * together with the no-argument {@link #open()} instead of
+     * {@link #open(FeedbackHandler)}.
+     */
+    public void setHandler(FeedbackHandler handler) {
         this.handler = handler;
+    }
+
+    public void open(FeedbackHandler handler) {
+        setHandler(handler);
         super.open();
     }
 

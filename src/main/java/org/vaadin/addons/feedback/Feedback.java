@@ -1,6 +1,5 @@
 package org.vaadin.addons.feedback;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 
 
@@ -66,35 +65,38 @@ public final class Feedback {
         var previousHandler = ui.getSession().getErrorHandler();
         ui.getSession().setErrorHandler(event -> {
 
-            // Handle errors with previous handler last
-            event.getComponent().flatMap(Component::getUI).ifPresent(errorUI -> {
+            // Open the feedback dialog on the registered UI. The ErrorEvent does
+            // not reliably carry the originating component for errors raised from
+            // a component listener, so the captured UI is used directly.
+            //
+            // accessSynchronously (not access) is required: the error handler runs
+            // while the request thread holds the session lock, so opening the
+            // dialog synchronously makes it part of the current response. access()
+            // would defer the change until the lock is released, and without @Push
+            // it would never reach the browser in this round-trip, leaving client
+            // and server out of sync (stale dialog, resync / lost connection).
+            ui.accessSynchronously(() -> {
+                var dialog = new SimpleFeedbackDialog() {{
+                    this.message.setValue("An unexpected system error occurred. Report details:\n");
+                    this.setHandler((FeedbackData d) -> {
 
-                    // Show feedback dialog only on the specified UI
-                    if (ui.equals(errorUI)) {
-                        errorUI.access(() -> {
-                            var dialog = new SimpleFeedbackDialog() {{
-                                this.message.setValue("An unexpected system error occurred. Report details:\n");
-                                this.handler = (FeedbackData d) -> {
+                        // Prepend error details to the feedback message
+                        String originalMessage = d.getMessage();
+                        String errorDetails = event.getThrowable().toString();
+                        d.setMessage(originalMessage + "\n\nSystem Error Details:\n" + errorDetails);
 
-                                    // Prepend error details to the feedback message
-                                    String originalMessage = d.getMessage();
-                                    String errorDetails = event.getThrowable().toString();
-                                    d.setMessage(originalMessage + "\n\nSystem Error Details:\n" + errorDetails);
+                        // Pass the feedback data to the provided handler
+                        feedbackHandler.handleFeedback(d);
+                    });
 
-                                    // Pass the feedback data to the provided handler
-                                    feedbackHandler.handleFeedback(d);
-                                };
-
-                            }};
-                            dialog.open();
-                        });
-                    }
+                }};
+                dialog.open();
             });
 
             // Call previous error handler last to ensure feedback dialog is shown first
             if (previousHandler != null) {
                 previousHandler.error(event);
-            };
+            }
         });
     }
 }
