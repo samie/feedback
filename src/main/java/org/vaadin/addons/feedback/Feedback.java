@@ -48,9 +48,24 @@ public final class Feedback {
      * This is suitable when you need detailed feedback information.
      *
      * @param handler the callback to handle the feedback data when submitted
+     * @return the opened DefaultFeedbackDialog instance, e.g. for calling
+     *         {@link DefaultFeedbackDialog#setSystemInfoVisible(boolean)}
      */
-    public static void normal(FeedbackHandler handler) {
-        DefaultFeedbackDialog.show(handler);
+    public static DefaultFeedbackDialog normal(FeedbackHandler handler) {
+        return DefaultFeedbackDialog.show(handler);
+    }
+
+    /**
+     * Opens the full feedback dialog with a custom {@link SystemInfoGenerator}
+     * controlling the system information that is shown and submitted.
+     *
+     * @param handler   the callback to handle the feedback data when submitted
+     * @param generator produces the system info (augment, replace, or return an
+     *                  empty map to omit it)
+     * @return the opened DefaultFeedbackDialog instance
+     */
+    public static DefaultFeedbackDialog normal(FeedbackHandler handler, SystemInfoGenerator generator) {
+        return DefaultFeedbackDialog.show(handler, generator);
     }
     /**
      * Registers a global error handler for the specified UI that shows a feedback dialog

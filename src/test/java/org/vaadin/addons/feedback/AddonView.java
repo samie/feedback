@@ -47,6 +47,29 @@ public class AddonView extends VerticalLayout {
                             .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 })));
 
+        // Full dialog without the system information section.
+        add(new Button("No system info", event ->
+                Feedback.normal(feedback ->
+                        Notification.show("Thanks! (no system info)",
+                                        3000, Notification.Position.MIDDLE)
+                                .addThemeVariants(NotificationVariant.LUMO_SUCCESS))
+                        .setSystemInfoVisible(false)));
+
+        // Full dialog augmenting the system information with an app version.
+        add(new Button("Augment system info", event ->
+                Feedback.normal(
+                        feedback -> {
+                            add(new Text("Augmented feedback: " + feedback));
+                            Notification.show("Thanks! (with app version)",
+                                            3000, Notification.Position.MIDDLE)
+                                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                        },
+                        ui -> {
+                            var info = DefaultFeedbackDialog.defaultSystemInfo(ui);
+                            info.put("App version", "4.2.1");
+                            return info;
+                        })));
+
         // Register the error handler once so an unhandled exception opens a
         // pre-filled feedback dialog. Clicking the button below triggers one.
         Feedback.registerErrorHandler(UI.getCurrent(), feedback -> {

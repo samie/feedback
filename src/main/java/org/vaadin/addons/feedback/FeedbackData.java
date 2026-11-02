@@ -50,8 +50,8 @@ public class FeedbackData {
 
     @Override
     public String toString() {
-        return String.format("FeedbackData{name='%s', email='%s', type='%s'}",
-                name, email, type);
+        return String.format("FeedbackData{name='%s', email='%s', type='%s', systemInfo='%s'}",
+                name, email, type, systemInfo);
     }
 
 }

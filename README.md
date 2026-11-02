@@ -63,6 +63,40 @@ add(new Button("Send detailed feedback", e -> Feedback.normal(data -> {
 The message is required (up to 1000 characters); name and email are optional. Both dialogs
 are modal and can be submitted by pressing **Enter**.
 
+### System information
+
+The full dialog gathers non-sensitive details about the running application and the user's
+client — Vaadin version, current view, browser, OS and language — and shows them in a
+collapsible **System information** section (collapsed by default). The same details are
+attached to the submitted `FeedbackData.getSystemInfo()`.
+
+Because this is both shown to the user and transmitted with the feedback, it contains only
+client/app values; server internals (Java version, server OS, file paths, IP address) are
+never included — keep that in mind if you customize it, and never add secrets.
+
+**Disable it** when system information isn't desirable:
+
+```java
+Feedback.normal(data -> saveFeedback(data))
+        .setSystemInfoVisible(false);
+```
+
+**Augment it** with your own fields (for example your application version) by starting from
+the built-in details and adding to them:
+
+```java
+Feedback.normal(
+        data -> saveFeedback(data),
+        ui -> {
+            Map<String, String> info = DefaultFeedbackDialog.defaultSystemInfo(ui);
+            info.put("App version", "4.2.1");
+            return info;
+        });
+```
+
+The generator is a `SystemInfoGenerator` (a serializable `UI -> Map<String, String>`).
+Return a fresh map to replace the built-in details entirely, or an empty map to omit them.
+
 ### Feedback types
 
 The full dialog's type selector is a `Select` populated from the i18n bundle, not a Java enum.
@@ -120,8 +154,8 @@ Feedback.normal(data -> {
 });
 ```
 
-> `FeedbackData` also has a `systemInfo` field reserved for future use — the built-in dialogs
-> do not populate it (the running Vaadin version is only shown in the full dialog's form).
+> The full dialog also sets `systemInfo` (see [System information](#system-information)); the
+> simple dialog leaves it `null`.
 
 ### Built-in internationalization
 
@@ -175,11 +209,17 @@ public class MyFeedbackDialog extends SimpleFeedbackDialog {
 
 ### Running the demo
 
+The demo is the Spring Boot application `TestApplication` (in the test sources). During
+development you typically just run that class from your IDE. To start it from the terminal:
+
 ```
-mvn jetty:run
+mvn spring-boot:test-run
 ```
 
-This deploys the demo at http://localhost:8080
+`test-run` uses the test runtime classpath, so the demo views under `src/test/java`
+(`AddonView`, `TestApplication`) are picked up without packaging them into the add-on JAR.
+It is also the default goal, so plain `mvn` works too. The demo starts at
+http://localhost:9999 (see `src/test/resources/application.properties`).
 
 ### Integration tests
 

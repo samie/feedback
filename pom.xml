@@ -6,7 +6,7 @@
 
     <groupId>org.vaadin.addons.feedback</groupId>
     <artifactId>feedback</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>Feedback</name>
     <description>Feedback Add-on for Vaadin</description>
 
@@ -133,7 +133,7 @@
     </dependencies>
 
     <build>
-        <defaultGoal>jetty:run</defaultGoal>
+        <defaultGoal>spring-boot:test-run</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -158,18 +158,17 @@
                 </configuration>                     
             </plugin>
 
+            <!-- Runs the Spring Boot demo (TestApplication) from the terminal.
+                 test-run uses the test runtime classpath, so the demo views
+                 under src/test/java (AddonView, TestApplication) are picked up
+                 without packaging them into the add-on JAR:
+                     mvn spring-boot:test-run   (or just: mvn) -->
             <plugin>
-                <groupId>org.eclipse.jetty.ee11</groupId>
-                <artifactId>jetty-ee11-maven-plugin</artifactId>
-                <version>12.1.11</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring.boot.version}</version>
                 <configuration>
-                    <scan>-1</scan>
-                    <!-- Use test scope because the UI/test classes are in
-                        the test package. -->
-                    <useTestScope>true</useTestScope>
-                    <supportedPackagings>
-                        <supportedPackaging>jar</supportedPackaging>
-                    </supportedPackagings>
+                    <mainClass>org.vaadin.addons.feedback.TestApplication</mainClass>
                 </configuration>
             </plugin>
 
