@@ -129,9 +129,11 @@ override `createFeedbackForm()` to call `type.setItems(...)` with your own value
 ### Crash reporting
 
 `Feedback.registerErrorHandler(...)` turns unhandled exceptions into user-submitted reports.
-When an error occurs on the given `UI`, the add-on opens a simple dialog pre-filled with a
-short notice, appends the exception details to whatever the user writes, invokes your handler,
-and then chains to any previously installed error handler. Calling it again for the same `UI`
+When an error occurs on the given `UI`, the add-on opens a generic, localized **System error**
+dialog (`SystemErrorDialog`) with a short explanation and an optional "What were you doing?"
+field. The exception is never shown to the user: if they click **Send report**, the exception
+details are appended to their (possibly empty) message and your handler is invoked; **Close**
+discards the report. The add-on then chains to any previously installed error handler. Calling it again for the same `UI`
 replaces that UI's handler, so it is safe to call from a view constructor.
 
 ```java

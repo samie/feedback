@@ -19,13 +19,11 @@ import com.vaadin.flow.server.VaadinSession;
  * Feedback.simple(data -> System.out.println("Feedback: " + data.getMessage()));
  *
  * // Open a full-featured feedback dialog
- * Feedback.full(data -> System.out.println("Feedback: " + data));
+ * Feedback.normal(data -> System.out.println("Feedback: " + data));
  *
- * // Wrap operations with error handling that shows feedback dialog on errors
- * Feedback.withErrorHandler(
- *     () -> riskyOperation(),
- *     data -> System.out.println("Error feedback: " + data.getMessage())
- * );
+ * // Show a system error dialog for unhandled exceptions in this UI
+ * Feedback.registerErrorHandler(UI.getCurrent(),
+ *     data -> System.out.println("Error report: " + data.getMessage()));
  * </pre>
  */
 public final class Feedback {
@@ -72,8 +70,8 @@ public final class Feedback {
         return DefaultFeedbackDialog.show(handler, generator);
     }
     /**
-     * Registers an error handler for the specified UI that shows a feedback dialog
-     * whenever an unhandled exception occurs in that UI.
+     * Registers an error handler for the specified UI that shows a
+     * {@link SystemErrorDialog} whenever an unhandled exception occurs in that UI.
      * <p>
      * This allows users to report issues directly from the application when errors happen.
      * Calling this again for the same UI replaces its feedback handler, so it is safe to
@@ -97,7 +95,7 @@ public final class Feedback {
     }
 
     /**
-     * Session error handler that opens a feedback dialog in the failing UI when
+     * Session error handler that opens a system error dialog in the failing UI when
      * that UI has a registered {@link FeedbackHandler}, then chains to the
      * previously installed error handler.
      */
@@ -123,23 +121,8 @@ public final class Feedback {
                 // would defer the change until the lock is released, and without @Push
                 // it would never reach the browser in this round-trip, leaving client
                 // and server out of sync (stale dialog, resync / lost connection).
-                ui.accessSynchronously(() -> {
-                    var dialog = new SimpleFeedbackDialog() {{
-                        this.message.setValue("An unexpected system error occurred. Report details:\n");
-                        this.setHandler((FeedbackData d) -> {
-
-                            // Prepend error details to the feedback message
-                            String originalMessage = d.getMessage();
-                            String errorDetails = event.getThrowable().toString();
-                            d.setMessage(originalMessage + "\n\nSystem Error Details:\n" + errorDetails);
-
-                            // Pass the feedback data to the provided handler
-                            feedbackHandler.handleFeedback(d);
-                        });
-
-                    }};
-                    dialog.open();
-                });
+                ui.accessSynchronously(() ->
+                        SystemErrorDialog.show(event.getThrowable(), feedbackHandler));
             }
 
             // Call previous error handler last to ensure feedback dialog is shown first

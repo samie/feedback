@@ -2,6 +2,7 @@ package org.vaadin.addons.feedback;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
+import com.microsoft.playwright.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -75,8 +76,23 @@ public class FeedbackIT extends AbstractBasePlaywrightIT {
 
         ButtonElement.getByText(page, "Trigger an error").click();
 
-        TextAreaElement.getByLabel(page, "Message").assertVisible();
+        TextAreaElement.getByLabel(page, "What were you doing? (optional)").assertVisible();
         assertThat(page.locator("vaadin-dialog[opened]")).hasCount(1);
+    }
+
+    @Test
+    @DisplayName("Should send an error report with hidden exception details")
+    void shouldSendErrorReportWithHiddenDetails() {
+        ButtonElement.getByText(page, "Trigger an error").click();
+
+        assertThat(page.getByText("System error", new Page.GetByTextOptions().setExact(true))).isVisible();
+        // The exception is never shown to the user in the dialog.
+        assertThat(page.getByText("IllegalStateException")).hasCount(0);
+
+        // The message is optional: sending an empty one still reports the error.
+        ButtonElement.getByText(page, "Send report").click();
+
+        assertThat(page.getByText("Error feedback:")).containsText("IllegalStateException");
     }
 
     @Test
