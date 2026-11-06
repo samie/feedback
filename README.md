@@ -131,7 +131,8 @@ override `createFeedbackForm()` to call `type.setItems(...)` with your own value
 `Feedback.registerErrorHandler(...)` turns unhandled exceptions into user-submitted reports.
 When an error occurs on the given `UI`, the add-on opens a simple dialog pre-filled with a
 short notice, appends the exception details to whatever the user writes, invokes your handler,
-and then chains to any previously installed error handler.
+and then chains to any previously installed error handler. Calling it again for the same `UI`
+replaces that UI's handler, so it is safe to call from a view constructor.
 
 ```java
 Feedback.registerErrorHandler(UI.getCurrent(),
@@ -221,6 +222,37 @@ mvn spring-boot:test-run
 It is also the default goal, so plain `mvn` works too. The demo starts at
 http://localhost:9999 (see `src/test/resources/application.properties`).
 
+### Realistic examples
+
+http://localhost:9999/examples (`ExamplesView`) shows the dialog the way an application
+would use it. There are four entry points: a **Feedback** button in the navbar, a **Send
+feedback** item in the user menu, a **Suggest it** button when an order search finds nothing,
+and a floating button in the bottom-right corner. Each one adds its own context (app version,
+signed-in user, search term) to the system information.
+
+Every submission is emailed to the developer by `FeedbackMailer` through Spring Mail:
+
+```java
+Feedback.normal(data -> {
+    mailer.send("Navbar", data);   // emails feedback.developer-email
+    Notification.show("Thanks! Your feedback was sent to the team.");
+});
+```
+
+Mail is configured in `application.properties`:
+
+```properties
+feedback.developer-email=developer@example.com
+feedback.embedded-smtp=true   # embedded GreenMail SMTP server, no Docker needed
+spring.mail.host=localhost
+spring.mail.port=3025
+```
+
+The embedded [GreenMail](https://greenmail-mail-test.github.io/greenmail/) server receives
+the email, and the console logs each send. To use a real SMTP server, set
+`feedback.embedded-smtp=false` and point `spring.mail.*` at it. If you remove
+`spring.mail.host`, the email is only logged.
+
 ### Integration tests
 
 The integration test (`FeedbackIT`) uses [DramaFinder](https://github.com/parttio/dramafinder)
@@ -239,8 +271,34 @@ Set `organization.name` in `pom.xml` to your own name/organization, then build t
 
 ```
 mvn versions:set -DnewVersion=1.0.0   # snapshot versions cannot be published
-mvn clean package -Pdirectory
+mvn clean install -Pdirectory
 ```
 
-The package is created as `target/feedback-1.0.0.zip`. To upload it, visit
+The package is created as `target/feedback-1.0.0.zip`. To upload it manually, visit
 https://vaadin.com/directory/my-components?uploadNewComponent
+
+### Uploading with the Directory API
+
+`scripts/publish-directory.sh` uploads the ZIP using the Vaadin Directory upload API. By default the
+version is uploaded as a draft; set `PUBLISH=true` to publish it right away.
+
+```
+DIRECTORY_API_KEY=<key> RELEASE_NOTES="Bug fixes" scripts/publish-directory.sh
+DIRECTORY_API_KEY=<key> PUBLISH=true RELEASE_NOTES_FILE=notes.md scripts/publish-directory.sh --build
+```
+
+`--build` runs `mvn clean install -Pdirectory` before uploading.
+
+### Automated release with GitHub Actions
+
+The workflow `.github/workflows/publish-directory.yml` runs the same script. Add the API key as the
+repository secret `DIRECTORY_API_KEY`, then:
+
+1. Set the version (`mvn versions:set -DnewVersion=1.2.0 && mvn versions:commit`), commit and push.
+2. Create a GitHub Release with tag `v1.2.0`. The release description is used as the release notes.
+   - A normal release is published in Directory immediately.
+   - A pre-release is uploaded as an unpublished draft.
+3. The workflow checks that the tag matches the project version, builds the ZIP, uploads it to
+   Directory and attaches it to the GitHub Release.
+
+The workflow can also be started manually from the Actions tab, with a choice to publish or upload a draft.

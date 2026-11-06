@@ -8,6 +8,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 
 import java.util.Locale;
 
@@ -82,5 +83,8 @@ public class AddonView extends VerticalLayout {
         add(new Button("Trigger an error", event -> {
             throw new IllegalStateException("Demo error for the feedback dialog");
         }));
+
+        add(new RouterLink("Feedback button usage examples \u2192", ExamplesView.class));
+
     }
 }

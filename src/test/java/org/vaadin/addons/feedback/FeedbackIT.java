@@ -19,7 +19,8 @@ import org.vaadin.addons.dramafinder.element.TextAreaElement;
  * navigates to {@link #getUrl()} and waits for Vaadin to finish loading before
  * each test. Headless is the default; pass {@code -Dheadless=false} to watch.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = ExamplesIT.TEST_SMTP_PORT)
 public class FeedbackIT extends AbstractBasePlaywrightIT {
 
     @LocalServerPort
@@ -59,6 +60,23 @@ public class FeedbackIT extends AbstractBasePlaywrightIT {
                 NotificationElement.getByText(page, "Thank you for your detailed feedback");
         notification.assertOpen();
         notification.assertContent("Thank you for your detailed feedback");
+    }
+
+    @Test
+    @DisplayName("Should open a single error dialog after re-entering the view")
+    void shouldOpenSingleErrorDialogAfterReentering() {
+        // Each visit re-creates AddonView, which registers the error handler again.
+        for (int i = 0; i < 2; i++) {
+            page.locator("a[href='examples']").click();
+            page.locator("#navbar-feedback").waitFor();
+            page.goBack();
+            ButtonElement.getByText(page, "Trigger an error").assertVisible();
+        }
+
+        ButtonElement.getByText(page, "Trigger an error").click();
+
+        TextAreaElement.getByLabel(page, "Message").assertVisible();
+        assertThat(page.locator("vaadin-dialog[opened]")).hasCount(1);
     }
 
     @Test
