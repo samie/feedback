@@ -16,7 +16,7 @@ This component was made as part of my [Vaadin Create 2026](https://vaadin.com/va
         <dependency>
             <groupId>org.vaadin.addons.feedback</groupId>
             <artifactId>feedback</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
         </dependency>
 ```
 
@@ -269,38 +269,46 @@ To run the same test against the Vaadin 24.9 baseline, add `-Pvaadin-24`.
 
 ## Publishing to Vaadin Directory
 
-Set `organization.name` in `pom.xml` to your own name/organization, then build the ZIP:
+Releases are made by pushing a tag. The workflow `.github/workflows/publish-directory.yml` takes
+the version from the tag (`v1.2.0` → `1.2.0`; only the tag has the `v`), builds the ZIP, uploads it
+to Vaadin Directory and creates a GitHub Release with the same notes and a link to Directory.
+The workflow never commits, so `pom.xml` keeps its `-SNAPSHOT` development version.
+
+One-time setup: get the Directory API key for the component and add it as a repository secret:
 
 ```
-mvn versions:set -DnewVersion=1.0.0   # snapshot versions cannot be published
+gh secret set DIRECTORY_API_KEY
+```
+
+### Making a release
+
+1. Sync and test: `git switch main && git pull --ff-only`, then `mvn -B verify -Pit`.
+2. Optionally update the dependency snippet in this README to the new version, then commit.
+3. Push `main`, so the commit you tag is on GitHub: `git push origin main`.
+4. Tag it: `git tag -a v1.2.0`. The tag message is used as the release notes (first line is the
+   summary). Without a message, the commit subjects since the previous tag are used.
+5. Push the tag: `git push origin v1.2.0`, and follow the run with `gh run watch`.
+6. Check that Directory lists 1.2.0 and that `gh release view v1.2.0` shows the notes.
+
+A tag with a suffix, such as `v1.2.0-rc1`, is uploaded as an unpublished Directory draft and marked
+as a GitHub pre-release.
+
+When you start work toward the next minor, bump the development version and commit it:
+`mvn versions:set -DnewVersion=1.3-SNAPSHOT -DgenerateBackupPoms=false`. Patch releases need no bump.
+
+If the build or the Directory upload fails, nothing is published: fix the problem, push `main`,
+move the tag (`git tag -d v1.2.0 && git push origin :refs/tags/v1.2.0`) and tag again. If only the
+GitHub Release step fails, don't re-run the workflow (Directory would get a second upload); create
+the release with `gh release create v1.2.0 --title 1.2.0 --verify-tag` instead.
+
+### Building the ZIP manually
+
+Set `organization.name` in `pom.xml` to your own name/organization, then:
+
+```
+mvn versions:set -DnewVersion=1.2.0 -DgenerateBackupPoms=false
 mvn clean install -Pdirectory
 ```
 
-The package is created as `target/feedback-1.0.0.zip`. To upload it manually, visit
+The package is created as `target/feedback-1.2.0.zip`. To upload it manually, visit
 https://vaadin.com/directory/my-components?uploadNewComponent
-
-### Uploading with the Directory API
-
-`scripts/publish-directory.sh` uploads the ZIP using the Vaadin Directory upload API. By default the
-version is uploaded as a draft; set `PUBLISH=true` to publish it right away.
-
-```
-DIRECTORY_API_KEY=<key> RELEASE_NOTES="Bug fixes" scripts/publish-directory.sh
-DIRECTORY_API_KEY=<key> PUBLISH=true RELEASE_NOTES_FILE=notes.md scripts/publish-directory.sh --build
-```
-
-`--build` runs `mvn clean install -Pdirectory` before uploading.
-
-### Automated release with GitHub Actions
-
-The workflow `.github/workflows/publish-directory.yml` runs the same script. Add the API key as the
-repository secret `DIRECTORY_API_KEY`, then:
-
-1. Set the version (`mvn versions:set -DnewVersion=1.2.0 && mvn versions:commit`), commit and push.
-2. Create a GitHub Release with tag `v1.2.0`. The release description is used as the release notes.
-   - A normal release is published in Directory immediately.
-   - A pre-release is uploaded as an unpublished draft.
-3. The workflow checks that the tag matches the project version, builds the ZIP, uploads it to
-   Directory and attaches it to the GitHub Release.
-
-The workflow can also be started manually from the Actions tab, with a choice to publish or upload a draft.
