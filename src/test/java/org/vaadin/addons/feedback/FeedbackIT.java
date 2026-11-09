@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.vaadin.addons.dramafinder.AbstractBasePlaywrightIT;
 import org.vaadin.addons.dramafinder.element.ButtonElement;
 import org.vaadin.addons.dramafinder.element.NotificationElement;
@@ -20,8 +21,9 @@ import org.vaadin.addons.dramafinder.element.TextAreaElement;
  * navigates to {@link #getUrl()} and waits for Vaadin to finish loading before
  * each test. Headless is the default; pass {@code -Dheadless=false} to watch.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = ExamplesIT.TEST_SMTP_PORT)
+// Same profile as ExamplesIT so both tests reuse one Spring context
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("smtp-test")
 public class FeedbackIT extends AbstractBasePlaywrightIT {
 
     @LocalServerPort

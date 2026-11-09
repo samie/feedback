@@ -13,31 +13,29 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.vaadin.addons.dramafinder.AbstractBasePlaywrightIT;
 import org.vaadin.addons.dramafinder.element.ButtonElement;
 import org.vaadin.addons.dramafinder.element.NotificationElement;
 import org.vaadin.addons.dramafinder.element.TextAreaElement;
 
 /**
- * Integration test for the realistic /examples view. Feedback is emailed to the
- * developer through the embedded GreenMail SMTP server, which lets the test
- * check the email that was actually sent.
+ * Integration test for the realistic /examples view. The {@code smtp-test}
+ * profile sends feedback emails through an embedded GreenMail SMTP server,
+ * which lets the test check the email that was actually sent.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = ExamplesIT.TEST_SMTP_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("smtp-test")
 public class ExamplesIT extends AbstractBasePlaywrightIT {
-
-    /**
-     * Keeps the test SMTP server off the dev server's port 3025. Shared with
-     * {@link FeedbackIT} so both tests reuse the same Spring context.
-     */
-    static final String TEST_SMTP_PORT = "spring.mail.port=3026";
 
     @LocalServerPort
     private int port;
 
     @Autowired
     private GreenMail greenMail;
+
+    @Autowired
+    private FeedbackMailer mailer;
 
     @Override
     public String getUrl() {
@@ -67,6 +65,30 @@ public class ExamplesIT extends AbstractBasePlaywrightIT {
         assertEquals("developer@example.com", mail.getAllRecipients()[0].toString());
         assertEquals("[Feedback] Quick feedback via Navbar", mail.getSubject());
         assertTrue(GreenMailUtil.getBody(mail).contains("The order list loads slowly in the morning"));
+    }
+
+    @Test
+    @DisplayName("FeedbackMailer sends the full feedback over SMTP")
+    void shouldSendFeedbackEmailOverSmtp() throws Exception {
+        FeedbackData data = new FeedbackData();
+        data.setType("Bug");
+        data.setName("Jane");
+        data.setEmail("jane@example.com");
+        data.setMessage("Export button does nothing");
+        data.setSystemInfo("Browser: Firefox");
+
+        mailer.send("Test", data);
+
+        assertTrue(greenMail.waitForIncomingEmail(5000, 1), "No feedback email received");
+        MimeMessage mail = greenMail.getReceivedMessages()[0];
+        assertEquals("noreply@example.com", mail.getFrom()[0].toString());
+        assertEquals("developer@example.com", mail.getAllRecipients()[0].toString());
+        assertEquals("jane@example.com", mail.getReplyTo()[0].toString());
+        assertEquals("[Feedback] Bug via Test", mail.getSubject());
+        String body = GreenMailUtil.getBody(mail);
+        assertTrue(body.contains("Export button does nothing"));
+        assertTrue(body.contains("Name: Jane"));
+        assertTrue(body.contains("Browser: Firefox"));
     }
 
     @Test

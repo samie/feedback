@@ -19,9 +19,9 @@ public class TestApplication  {
     }
 
     /**
-     * Embedded SMTP server that receives the feedback emails sent by the
-     * /examples demo, so no external mail server is needed. Disable with
-     * {@code feedback.embedded-smtp=false} to send through a real server.
+     * Embedded SMTP server that receives the feedback emails in the integration
+     * tests, enabled with {@code feedback.embedded-smtp=true} (see the
+     * {@code smtp-test} profile). The demo itself only prints the emails.
      */
     @Bean(initMethod = "start", destroyMethod = "stop")
     @ConditionalOnProperty(name = "feedback.embedded-smtp", havingValue = "true")

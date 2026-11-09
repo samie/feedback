@@ -241,19 +241,19 @@ Feedback.normal(data -> {
 });
 ```
 
-Mail is configured in `application.properties`:
+No mail server is configured for the demo, so `FeedbackMailer` prints each email (To,
+Subject and body) to the console instead of sending it. To send real email, point
+`spring.mail.*` in `application.properties` at an SMTP server:
 
 ```properties
 feedback.developer-email=developer@example.com
-feedback.embedded-smtp=true   # embedded GreenMail SMTP server, no Docker needed
-spring.mail.host=localhost
-spring.mail.port=3025
+spring.mail.host=smtp.example.com
+spring.mail.port=587
 ```
 
-The embedded [GreenMail](https://greenmail-mail-test.github.io/greenmail/) server receives
-the email, and the console logs each send. To use a real SMTP server, set
-`feedback.embedded-smtp=false` and point `spring.mail.*` at it. If you remove
-`spring.mail.host`, the email is only logged.
+The integration tests run with the `smtp-test` profile (`application-smtp-test.properties`),
+which starts an embedded [GreenMail](https://greenmail-mail-test.github.io/greenmail/) SMTP
+server. `ExamplesIT` checks that the emails are actually delivered.
 
 ### Integration tests
 
