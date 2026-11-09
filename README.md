@@ -1,3 +1,7 @@
+[![Published on Vaadin Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/feedback)
+[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/feedback.svg)](https://vaadin.com/directory/component/feedback)
+[![Latest version](https://img.shields.io/vaadin-directory/v/feedback.svg)](https://vaadin.com/directory/component/feedback)
+
 # Feedback Add-on for Vaadin
 
 A small Vaadin Flow add-on that shows a ready-made feedback dialog so users can send
@@ -5,6 +9,8 @@ comments, bug reports, or feature requests from within your application. It ship
 ready-made dialogs, is built entirely from standard Vaadin components (a single server-side
 dependency, no npm/JavaScript build), and is localized out of the box in English, German,
 Finnish, and French.
+
+![The full feedback dialog opened from the examples view](docs/feedback-dialog.png)
 
 This component was made as part of my [Vaadin Create 2026](https://vaadin.com/vaadin-create-2026) talk. 
 
