@@ -15,7 +15,7 @@ import java.util.Locale;
 @Route("/")
 public class AddonView extends VerticalLayout {
 
-    public AddonView() {
+    public AddonView(FeedbackMailer mailer) {
 
         Select<Locale> localeSelect = new Select<>("Select locale", event -> {
             if (event.getValue() != null) {
@@ -73,11 +73,19 @@ public class AddonView extends VerticalLayout {
 
         // Register the error handler once so an unhandled exception opens a
         // pre-filled feedback dialog. Clicking the button below triggers one.
+        // The report is also emailed to the developer (see FeedbackMailer).
         Feedback.registerErrorHandler(UI.getCurrent(), feedback -> {
             add(new Text("Error feedback: " + feedback.getMessage()));
-            Notification.show("Thank you for reporting the problem!",
-                            3000, Notification.Position.MIDDLE)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            try {
+                mailer.send("Error handler", feedback);
+                Notification.show("Thank you for reporting the problem!",
+                                3000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } catch (RuntimeException e) {
+                Notification.show("Sorry, the report could not be sent. Please try again later.",
+                                5000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
         });
 
         add(new Button("Trigger an error", event -> {

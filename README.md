@@ -257,6 +257,16 @@ spring.mail.host=smtp.example.com
 spring.mail.port=587
 ```
 
+To see the emails in a web inbox instead, run the demo with the `mail-ui` profile:
+
+```
+mvn -Pmail-ui
+```
+
+The demo then sends the emails to an embedded GreenMail SMTP server, and the inbox opens at
+http://localhost:8025. The profile uses `org.vaadin.greenmail:greenmail-ui`, which is not on
+Maven Central yet, so it has to be installed in your local Maven repository first.
+
 The integration tests run with the `smtp-test` profile (`application-smtp-test.properties`),
 which starts an embedded [GreenMail](https://greenmail-mail-test.github.io/greenmail/) SMTP
 server. `ExamplesIT` checks that the emails are actually delivered.
