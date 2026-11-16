@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Project from https://github.com/samie/feedback -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <!-- Project from https://github.com/samie/feedback -->
 
     <groupId>org.vaadin.addons.feedback</groupId>
     <artifactId>feedback</artifactId>
@@ -12,8 +12,8 @@
     <description>Feedback Add-on for Vaadin</description>
 
     <properties>
-        <vaadin.version>25.3.0</vaadin.version>
-        <spring.boot.version>4.1.1</spring.boot.version>
+        <vaadin.version>25.3.5</vaadin.version>
+        <spring.boot.version>4.1.2</spring.boot.version>
 
         <!-- Emit Java 17 bytecode (Vaadin 24.9 floor) so the add-on JAR also
              loads in Vaadin 24.x apps, even though the build itself needs JDK 21. -->
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>org.vaadin.addons</groupId>
             <artifactId>dramafinder</artifactId>
-            <version>1.2.0</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -152,7 +152,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <index>true</index>
@@ -310,7 +309,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.2.2</version>
                         <configuration>
                             <!-- Generated file that shouldn't be included in add-ons -->
                             <excludes>
@@ -374,7 +372,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>3.0.0-M5</version>
                         <executions>
                             <execution>
                                 <goals>

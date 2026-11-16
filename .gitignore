@@ -17,6 +17,8 @@ package.json
 package-lock.json
 tsconfig.json
 types.d.ts
+vite.config.ts
+src/main/frontend/views/
 
 # Browser drivers for local integration tests
 drivers/
