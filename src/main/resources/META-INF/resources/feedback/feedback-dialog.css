@@ -1,0 +1,60 @@
+/*
+ * Mobile support for the feedback dialogs. Selectors cover both Vaadin 25
+ * (overlay inside <vaadin-dialog>) and Vaadin 24 (separate
+ * <vaadin-dialog-overlay> that receives the dialog's class names).
+ */
+
+/* The header close button is only shown when the dialog is full-screen, where
+   the on-screen keyboard may cover the footer buttons. */
+.feedback-dialog .feedback-close {
+    display: none;
+}
+
+/* Phones: full-screen, like the iOS compose sheet and Material's full-screen
+   dialog. The overlay is pinned to the viewport rather than sized within the
+   overlay container, which keeps a small gap to the viewport edges. */
+@media (max-width: 600px) {
+    vaadin-dialog.feedback-dialog::part(overlay),
+    vaadin-dialog-overlay.feedback-dialog::part(overlay) {
+        position: fixed;
+        inset: 0;
+        /* !important overrides the inline width set by Dialog.setWidth() */
+        width: auto !important;
+        height: auto !important;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        /* Keep content clear of the notch and home indicator. */
+        padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+            env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    }
+
+    vaadin-dialog.feedback-dialog::part(content),
+    vaadin-dialog-overlay.feedback-dialog::part(content) {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    /* Auto margins would collapse the divider in the flex column. */
+    .feedback-dialog hr {
+        margin-inline: 0;
+    }
+
+    /* Let the message fill the free space, like a compose sheet. */
+    .feedback-dialog .feedback-message {
+        flex-grow: 1;
+    }
+
+    .feedback-dialog .feedback-close {
+        display: inline-flex;
+    }
+}
+
+/* Touch screens: at least 44pt (iOS) / 48dp (Android) tap targets. */
+@media (pointer: coarse) {
+    .feedback-dialog vaadin-button {
+        min-height: 48px;
+        min-width: 48px;
+    }
+}

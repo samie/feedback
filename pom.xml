@@ -20,6 +20,8 @@
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Version-specific demo sources (the theme setup in AppShell) -->
+        <demo.vaadin.sources>src/test/vaadin-25/java</demo.vaadin.sources>
     </properties>
     <organization>
         <name>Sami Ekblad</name>
@@ -171,6 +173,27 @@
                 </configuration>                     
             </plugin>
 
+            <!-- Adds the demo sources for the Vaadin version being built
+                 (see demo.vaadin.sources); never packaged in the add-on. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-demo-vaadin-sources</id>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${demo.vaadin.sources}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Runs the Spring Boot demo (TestApplication) from the terminal.
                  test-run uses the test runtime classpath, so the demo views
                  under src/test/java (AddonView, TestApplication) are picked up
@@ -221,6 +244,7 @@
             <properties>
                 <vaadin.version>24.9.3</vaadin.version>
                 <spring.boot.version>3.5.6</spring.boot.version>
+                <demo.vaadin.sources>src/test/vaadin-24/java</demo.vaadin.sources>
             </properties>
         </profile>
         <profile>

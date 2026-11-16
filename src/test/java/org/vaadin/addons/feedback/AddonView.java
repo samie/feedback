@@ -93,6 +93,7 @@ public class AddonView extends VerticalLayout {
         }));
 
         add(new RouterLink("Feedback button usage examples \u2192", ExamplesView.class));
+        add(new RouterLink("Mobile example \u2192", MobileExampleView.class));
 
     }
 }

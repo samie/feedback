@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
+import com.microsoft.playwright.options.BoundingBox;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,6 +66,21 @@ public class ExamplesIT extends AbstractBasePlaywrightIT {
         assertEquals("developer@example.com", mail.getAllRecipients()[0].toString());
         assertEquals("[Feedback] Quick feedback via Navbar", mail.getSubject());
         assertTrue(GreenMailUtil.getBody(mail).contains("The order list loads slowly in the morning"));
+    }
+
+    @Test
+    @DisplayName("Dialog keeps its desktop size and hides the mobile close button")
+    void shouldKeepDesktopLayout() {
+        page.setViewportSize(1280, 800);
+        page.locator("#navbar-feedback").click();
+        TextAreaElement.getByLabel(page, "Message").assertVisible();
+
+        // Measure after the opening animation, which scales the overlay. The
+        // selectors cover Vaadin 25 and the separate overlay element of Vaadin 24.
+        page.waitForFunction("() => !document.querySelector('vaadin-dialog[opening], vaadin-dialog-overlay[opening]')");
+        BoundingBox box = page.locator(".feedback-dialog [part='overlay']").boundingBox();
+        assertEquals(460, box.width, 1);
+        assertThat(page.locator(".feedback-close")).isHidden();
     }
 
     @Test

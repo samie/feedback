@@ -1,6 +1,7 @@
 package org.vaadin.addons.feedback;
 
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.textfield.Autocapitalize;
 import com.vaadin.flow.component.textfield.TextArea;
 
 /**
@@ -29,6 +30,7 @@ public class SystemErrorDialog extends SimpleFeedbackDialog {
     @Override
     protected void updateTexts() {
         setHeaderTitle(i18n.get("system_error_title"));
+        closeButton.setAriaLabel(i18n.get("button_close"));
 
         if (message != null) {
             description.setText(i18n.get("system_error_description"));
@@ -52,7 +54,9 @@ public class SystemErrorDialog extends SimpleFeedbackDialog {
         message.setPlaceholder(i18n.get("system_error_message_placeholder"));
         message.setMaxLength(1000);
         message.setWidthFull();
-        message.setHeight("6rem");
+        message.setMinHeight("6rem");
+        message.setAutocapitalize(Autocapitalize.SENTENCES);
+        message.addClassName("feedback-message");
         add(description, message);
     }
 

@@ -147,6 +147,34 @@ Feedback.registerErrorHandler(UI.getCurrent(),
         data -> log.warn("User-reported error: {}", data.getMessage()));
 ```
 
+### Mobile support
+
+On phones (viewports up to 600px wide) all dialogs open **full-screen**, like a compose sheet
+on iOS or a full-screen dialog on Android. The message field fills the free space, and a close
+button in the header stays reachable when the on-screen keyboard covers the footer. On touch
+screens the buttons get 48px tap targets, the minimum recommended by Apple (44pt) and Google
+(48dp). The name and email fields offer autofill, and the message starts with a capital
+letter. On desktop the dialogs look the same as before.
+
+The styles come from a static stylesheet bundled in the add-on, so no frontend build is needed.
+To keep the regular centered dialog on phones as well, remove its class name:
+
+```java
+Feedback.simple(data -> saveFeedback(data))
+        .removeClassName("feedback-dialog");
+```
+
+On a compact app bar, an icon-only button works well. Give it an accessible name for screen
+readers and a tooltip for desktop users:
+
+```java
+Button feedback = new Button(VaadinIcon.COMMENT_ELLIPSIS_O.create(),
+        e -> Feedback.simple(data -> saveFeedback(data)));
+feedback.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+feedback.setAriaLabel("Send feedback");
+feedback.setTooltipText("Send feedback");
+```
+
 ### The `FeedbackData` object
 
 Your handler always receives a `FeedbackData`. Which fields are populated depends on the
@@ -213,6 +241,10 @@ public class MyFeedbackDialog extends SimpleFeedbackDialog {
 * `DefaultFeedbackDialog` / `SimpleFeedbackDialog`: the dialog implementations.
 * `AddonView.java` (test folder): a demo view for trying the component. Classes under the test
   folder are not packaged in the add-on JAR.
+* `AppShell.java` (`src/test/vaadin-25` and `src/test/vaadin-24`): selects the demo's theme,
+  Aura on Vaadin 25 and Lumo on the Vaadin 24 baseline. The theme API differs between the
+  versions, so the pom picks the folder (`demo.vaadin.sources`). The add-on itself never sets a
+  theme; that is up to the application.
 * `assembly/`: packaging configuration for the Vaadin Directory ZIP. There is usually no need to
   modify these files unless you need extra JAR manifest entries.
 
@@ -237,6 +269,10 @@ would use it. There are four entry points: a **Feedback** button in the navbar, 
 feedback** item in the user menu, a **Suggest it** button when an order search finds nothing,
 and a floating button in the bottom-right corner. Each one adds its own context (app version,
 signed-in user, search term) to the system information.
+
+http://localhost:9999/mobile (`MobileExampleView`) is a phone-first version: a compact app bar
+with an icon-only feedback button above a list of order cards. Open it in your browser's
+device mode to see the full-screen dialog.
 
 Every submission is emailed to the developer by `FeedbackMailer` through Spring Mail:
 
@@ -269,7 +305,8 @@ Maven Central yet, so it has to be installed in your local Maven repository firs
 
 The integration tests run with the `smtp-test` profile (`application-smtp-test.properties`),
 which starts an embedded [GreenMail](https://greenmail-mail-test.github.io/greenmail/) SMTP
-server. `ExamplesIT` checks that the emails are actually delivered.
+server. `ExamplesIT` and `MobileExampleIT` check that the emails are actually delivered;
+`MobileExampleIT` runs at a phone-sized viewport.
 
 ### Integration tests
 

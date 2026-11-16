@@ -11,6 +11,8 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.Autocapitalize;
+import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -82,6 +84,7 @@ public class DefaultFeedbackDialog extends AbstractFeedbackDialog implements Loc
      */
     protected void updateTexts() {
         setHeaderTitle(i18n.get("title"));
+        closeButton.setAriaLabel(i18n.get("button_close"));
 
         if (type != null) {
             String selected = type.getValue();
@@ -135,10 +138,14 @@ public class DefaultFeedbackDialog extends AbstractFeedbackDialog implements Loc
         message.setMaxLength(1000);
         message.setHelperText(i18n.get("message_helper"));
         message.setMinHeight("120px");
+        message.setAutocapitalize(Autocapitalize.SENTENCES);
 
         name = new TextField(i18n.get("name"));
         name.setPlaceholder(i18n.get("name_placeholder"));
+        // Lets mobile browsers offer autofill for the optional contact details.
+        name.setAutocomplete(Autocomplete.NAME);
         email = new EmailField(i18n.get("email"));
+        email.setAutocomplete(Autocomplete.EMAIL);
         email.setPlaceholder(i18n.get("email_placeholder"));
         email.setHelperText(i18n.get("email_help"));
 

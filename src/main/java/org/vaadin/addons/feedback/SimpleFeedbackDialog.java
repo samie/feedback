@@ -5,6 +5,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.textfield.Autocapitalize;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import java.util.Locale;
@@ -57,6 +58,7 @@ public class SimpleFeedbackDialog extends AbstractFeedbackDialog {
      */
     protected void updateTexts() {
         setHeaderTitle(i18n.get("title"));
+        closeButton.setAriaLabel(i18n.get("button_close"));
 
         if (message != null) {
             message.setLabel(i18n.get("message"));
@@ -76,7 +78,11 @@ public class SimpleFeedbackDialog extends AbstractFeedbackDialog {
         message.setMinLength(1);
         message.setMaxLength(1000);
         message.setWidthFull();
-        message.setHeight("10rem");
+        // A minimum rather than a fixed height lets the message fill the
+        // full-screen dialog on phones.
+        message.setMinHeight("10rem");
+        message.setAutocapitalize(Autocapitalize.SENTENCES);
+        message.addClassName("feedback-message");
         add(message);
     }
 
